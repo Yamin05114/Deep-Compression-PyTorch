@@ -12,7 +12,7 @@ def apply_weight_sharing(model, bits=5):
         dev = module.weight.device
         weight = module.weight.data.cpu().numpy()
         shape = weight.shape
-        mat = csr_matrix(weight) if shape[0] < shape[1] else csc_matrix(weight)
+        mat = csr_matrix(weight) if shape[0] < shape[1] else csc_matrix(weight) # 谁少用谁的模式
         min_ = min(mat.data)
         max_ = max(mat.data)
         space = np.linspace(min_, max_, num=2**bits)
@@ -20,6 +20,5 @@ def apply_weight_sharing(model, bits=5):
         kmeans.fit(mat.data.reshape(-1,1))
         new_weight = kmeans.cluster_centers_[kmeans.labels_].reshape(-1)
         mat.data = new_weight
-        module.weight.data = torch.from_numpy(mat.toarray()).to(dev)
-
-
+        module.weight.data = torch.from_numpy(mat.toarray()).to(dev)  # 其实转化成sparse还要转换回来
+        
